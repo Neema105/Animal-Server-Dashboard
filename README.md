@@ -13,3 +13,5 @@ I approach problems as a computer scientist by breaking client requirements into
 What do computer scientists do, and why does it matter? How would your work on this type of project help a company, like Grazioso Salvare, to do their work better?
 
 Computer scientists create systems that transform data into meaningful, efficient, and scalable solutions. This work matters because it helps organizations operate more effectively and make informed decisions. My work on this project would help a company like Grazioso Salvare better manage their data, streamline operations, and build tools that support long-term growth and adaptability.
+
+[https://www.youtube.com/watch?v=tIyDCldSdRU]
