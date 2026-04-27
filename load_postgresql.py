@@ -1,56 +1,31 @@
-import os
-from pathlib import Path
+#Neema Taghipour
+# CS499 Capstone Project
+# username: admin
+# password: password!
+from dash import Dash
 
-import pandas as pd
+from repositories.user_repository import build_user_repository
+from services.auth_service import AuthService
+from services.dashboard_service import DashboardService
+from ui.callbacks import register_callbacks
+from ui.layout import build_layout
 
-from CRUD_Python_Module import PostgresAnimalShelter, psycopg
+#main ap
+def create_app():
+    app = Dash(__name__)
+
+    user_repository = build_user_repository()
+    auth_service = AuthService(user_repository)
+    dashboard_service = DashboardService()
+
+    initial_dataframe = dashboard_service.get_initial_dataframe()
+    app.layout = build_layout(initial_dataframe, dashboard_service.data_source_label)
+    register_callbacks(app, auth_service, dashboard_service)
+    return app
 
 
-BASE_DIR = Path(__file__).resolve().parent
-DATA_FILE = BASE_DIR / "dogs_dataset.csv"
-SCHEMA_FILE = BASE_DIR / "schema.sql"
-
-
-def main():
-    dsn = os.getenv("POSTGRES_DSN")
-    if not dsn:
-        raise RuntimeError("Set the POSTGRES_DSN environment variable before running this loader.")
-    if psycopg is None:
-        raise RuntimeError("psycopg is not installed. Install it with 'pip install psycopg[binary]'.")
-
-    shelter = PostgresAnimalShelter(dsn)
-    dataframe = pd.read_csv(DATA_FILE)
-
-    with shelter._get_connection() as connection:
-        with connection.cursor() as cursor:
-            cursor.execute(SCHEMA_FILE.read_text(encoding="utf-8"))
-            cursor.execute(f"TRUNCATE TABLE {shelter.table_name}")
-
-            rows = list(dataframe.itertuples(index=False, name=None))
-            cursor.executemany(
-                f"""
-                INSERT INTO {shelter.table_name} (
-                    animal_id,
-                    name,
-                    animal_type,
-                    breed,
-                    age_upon_outcome_in_weeks,
-                    color,
-                    sex_upon_outcome,
-                    outcome_type,
-                    intake_type,
-                    intake_condition,
-                    location_lat,
-                    location_long
-                )
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-                """,
-                rows,
-            )
-        connection.commit()
-
-    print(f"Loaded {len(dataframe)} rows into PostgreSQL table '{shelter.table_name}'.")
+app = create_app()
 
 
 if __name__ == "__main__":
-    main()
+    app.run(debug=True, port=8050)
