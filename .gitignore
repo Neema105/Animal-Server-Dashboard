@@ -1,0 +1,7 @@
+﻿.venv/
+__pycache__/
+*.pyc
+.idea/
+login_data.txt
+users.json
+.env
